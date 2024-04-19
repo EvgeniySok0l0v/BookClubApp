@@ -7,18 +7,14 @@ namespace BookClubApp.Entity
     public class Book
     {
         
-        
         [Key]
         public int Id { get; set; }
-        public string? Title 
-        {
-            get; set;
-        }
+        public string? Title { get; set; }
 
         public Book(string title)
         {
             Title = title;
         }
-        public ICollection<User>? Users { get; set; }
+        public ICollection<UserBook>? UserBooks { get; set; }
     }
 }

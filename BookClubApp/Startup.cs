@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -7,6 +8,7 @@ namespace BookClubApp
 {
     public class Startup
     {
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -21,18 +23,14 @@ namespace BookClubApp
                 npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "libraryDB")));
 
             // Настройка аутентификации и авторизации
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "Cookies";
-                options.DefaultSignInScheme = "Cookies";
-                options.DefaultChallengeScheme = "Cookies";
-            })
-            .AddCookie("Cookies", options =>
-            {
-                options.LoginPath = "/";
-            });
+            // установка конфигурации подключения
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => //CookieAuthenticationOptions
+                {
+                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Login/Login");
+                });
 
-            services.AddAuthorization();
+            //services.AddAuthorization();
 
             // Добавляем контроллеры как сервис
             services.AddControllersWithViews();
@@ -57,18 +55,16 @@ namespace BookClubApp
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
+            app.UseAuthentication();    // аутентификация
+            app.UseAuthorization();     // авторизация
+                              
+           
+          
             app.UseEndpoints(endpoints =>
             {
-                 endpoints.MapControllerRoute(
-                    name: "login",
-                    pattern: "/",
-                    defaults: new { controller = "Login", action = "Login" });
                 endpoints.MapControllerRoute(
-                    name: "home",
-                    pattern: "/Home/{controller=Home}/{action=Index}/{id?}")
-                .RequireAuthorization(); 
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
