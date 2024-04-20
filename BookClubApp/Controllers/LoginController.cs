@@ -1,5 +1,6 @@
 ﻿using BookClubApp.Entity;
 using BookClubApp.Models;
+using BookClubApp.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -8,15 +9,10 @@ using System.Security.Claims;
 
 namespace BookClubApp.Controllers
 {
-    public class LoginController : Controller
+    public class LoginController(ApplicationDbContext? context, IUserService userService) : Controller
     {
-        private ApplicationDbContext? _context;
-
-        public LoginController(ApplicationDbContext? context)
-        {
-            _context = context;
-        }
-
+        private readonly ApplicationDbContext? _context = context;
+        private readonly IUserService _userService = userService; 
         public IActionResult Login()
         {
             return View();
@@ -28,21 +24,21 @@ namespace BookClubApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == model.UserName);
+                User user = _userService.GetUserByUserName(userName: model.UserName);
                 if (user != null)
                 {
                     await Authenticate(userName: model.UserName); // аутентификация
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Book");
                 }
                 else
                 {
                     _context.Users.Add(new User(model.UserName));
                     _context.SaveChanges();
                     await Login(model);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Book");
                 }
-                ModelState.AddModelError("", "Некорректные логин");
+                //ModelState.AddModelError("", "Некорректные логин");
             }
             return View(model);
         }
@@ -52,10 +48,10 @@ namespace BookClubApp.Controllers
             // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                new(ClaimsIdentity.DefaultNameClaimType, userName)
             };
             // создаем объект ClaimsIdentity
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
             // установка аутентификационных куки
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }

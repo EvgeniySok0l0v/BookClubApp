@@ -1,5 +1,7 @@
 using BookClubApp.Entity;
 using BookClubApp.Models;
+using BookClubApp.Services;
+using BookClubApp.Services.Imp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,16 +11,18 @@ using System.Diagnostics;
 namespace BookClubApp.Controllers
 {
     
-    public class HomeController : Controller
+    public class BookController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<BookController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IBookService _bookService;
         //private UserVM UserVM { get; set; }
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public BookController(ILogger<BookController> logger, ApplicationDbContext context, IBookService bookService)
         {
             _logger = logger;
             _context = context;
+            _bookService = bookService;
         }
 
         [Authorize]
@@ -26,7 +30,7 @@ namespace BookClubApp.Controllers
         {
             UserVM u = new UserVM(1, "xyz");
             // Проверяем, аутентифицирован ли пользователь
-            
+            var ui = User.Identity;
             if (!User.Identity.IsAuthenticated)
             {
                 // Если пользователь не аутентифицирован, перенаправляем на страницу входа
@@ -39,43 +43,28 @@ namespace BookClubApp.Controllers
 
         public IActionResult AllBooks()
         {
-            var allBooks = _context.Books.ToList();
-            return View(allBooks);
+            return View(_bookService.GetAllBooks(User.Identity.Name));
         }
 
         public IActionResult ReadedBooks()
         {
-            var userId = _context.Users.First(u => u.UserName == User.Identity.Name).Id;
-            var userBooks = _context.UserBooks.Where(ub => ub.UserId == userId).ToList();
-            
-            var bookIds = new List<int>();
-            userBooks.ForEach(ub => bookIds.Add(ub.BookId));
-
-            var readedBooks = _context.Books.Where(b => bookIds.Contains(b.Id)).ToList();
-            return View(readedBooks);
+            return View(_bookService.GetReadedBooks(User.Identity.Name));
         }
 
         [HttpPost]
         public async Task<IActionResult> AddReadedBook(int bookId, string userName)
         {
-            var userId = _context.Users.First(u => u.UserName == userName).Id;
+            _bookService.AddToReadedBook(bookId, userName);
 
-            _context.UserBooks.Add(new UserBook(userId, bookId));
-            _context.SaveChanges();
-
-            return RedirectToAction("AllBooks", "Home");
+            return RedirectToAction("AllBooks", "Book");
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteReadedBook(int bookId, string userName)
         {
-            var userId = _context.Users.First(u => u.UserName == userName).Id;
-            
-            _context.UserBooks.Where(ub => ub.UserId == userId && ub.BookId == bookId).ExecuteDelete();
-  
-            _context.SaveChanges();
+            _bookService.DeleteFromReadedBook(bookId, userName);
 
-            return RedirectToAction("ReadedBooks", "Home");
+            return RedirectToAction("ReadedBooks", "Book");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

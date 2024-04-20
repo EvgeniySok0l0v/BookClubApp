@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using BookClubApp.Services;
+using BookClubApp.Services.Imp;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +37,8 @@ namespace BookClubApp
             // Добавляем контроллеры как сервис
             services.AddControllersWithViews();
             services.AddMvc();
+            services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
         // Этот метод вызывается во время выполнения. Используется для настройки конвейера HTTP-запросов.
@@ -46,7 +50,7 @@ namespace BookClubApp
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Book/Error");
                 app.UseHsts();
             }
 
@@ -64,7 +68,7 @@ namespace BookClubApp
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Book}/{action=Index}/{id?}");
             });
         }
     }

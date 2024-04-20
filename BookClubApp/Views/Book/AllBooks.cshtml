@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Books";
+}
+@model List<BookClubApp.Models.BookModel>
+
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>ButAdd</th>
+            <!-- Добавьте заголовки для других столбцов -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>
+                    @if (!item.IsReaded)
+                    {
+                        <!-- Добавляем кнопку Add -->
+                        <form id="addReadedBook" asp-controller="Book" asp-action="AddReadedBook" method="post">
+                            <input type="hidden" name="bookId" value=@item.Id />
+                            <input type="hidden" name="userName" value=@User.Identity.Name />
+                            <button type="submit" class="nav-link btn btn-link">Add</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <input type="submit" value="Added" disabled />
+                    }
+                </td>
+                <!-- Отобразите другие свойства объекта в других ячейках -->
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,7 +1,7 @@
 ﻿@{
-    ViewData["Title"] = "Books";
+    ViewData["Title"] = "ReadedBooks";
 }
-@model List<BookClubApp.Entity.Book>
+@model List<BookClubApp.Models.BookModel>
 
 <table>
     <thead>
@@ -18,10 +18,10 @@
                 <td>@item.Title</td>
                 <td>
                     <!-- Добавляем кнопку Add -->
-                    <form id="addReadedBook" asp-controller="Home" asp-action="AddReadedBook" method="post">
+                    <form id="deleteReadedBook" asp-controller="Book" asp-action="DeleteReadedBook" method="post">
                         <input type="hidden" name="bookId" value=@item.Id />
                         <input type="hidden" name="userName" value=@User.Identity.Name />
-                        <button type="submit" class="nav-link btn btn-link">Add</button>
+                        <button type="submit" class="nav-link btn btn-link">Delete</button>
                     </form>
                 </td>
                 <!-- Отобразите другие свойства объекта в других ячейках -->
