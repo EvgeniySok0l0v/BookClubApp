@@ -2,11 +2,17 @@
     ViewData["Title"] = "Login";
 }
 
+
 <h2>Login</h2>
 
 <form asp-action="Login" asp-controller="Login" asp-anti-forgery="true">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" />
+    <div class="col-md-4 mb-3">
+        
+        <input type="text" id="username" name="username" class="form-control" placeholder="Username" />
+    </div>
     <br />
-    <button type="submit">Login</button>
+
+    <button class="btn btn-primary" type="submit">Log in</button>
+
 </form>
+

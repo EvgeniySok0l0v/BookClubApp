@@ -2,46 +2,46 @@
 using BookClubApp.Services.Imp;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
+
 
 namespace BookClubApp
 {
-    public class Startup
+    /// <summary>
+    /// Startup class
+    /// </summary>
+    /// <param name="configuration">config</param>
+    public class Startup(IConfiguration configuration)
     {
-        
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public IConfiguration Configuration { get; } = configuration;
 
-        public IConfiguration Configuration { get; }
-
+        /// <summary>
+        /// ConfigureServices
+        /// </summary>
+        /// <param name="services">services</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
                 npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "libraryDB")));
 
-            // Настройка аутентификации и авторизации
-            // установка конфигурации подключения
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => //CookieAuthenticationOptions
+                .AddCookie(options => 
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Login/Login");
                 });
 
-            //services.AddAuthorization();
 
-            // Добавляем контроллеры как сервис
             services.AddControllersWithViews();
             services.AddMvc();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IUserService, UserService>();
         }
 
-        // Этот метод вызывается во время выполнения. Используется для настройки конвейера HTTP-запросов.
+        /// <summary>
+        /// config
+        /// </summary>
+        /// <param name="app">app</param>
+        /// <param name="env">env</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -59,11 +59,9 @@ namespace BookClubApp
 
             app.UseRouting();
 
-            app.UseAuthentication();    // аутентификация
-            app.UseAuthorization();     // авторизация
+            app.UseAuthentication();    
+            app.UseAuthorization();     
                               
-           
-          
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

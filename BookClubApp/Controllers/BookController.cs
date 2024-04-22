@@ -1,69 +1,56 @@
-using BookClubApp.Entity;
 using BookClubApp.Models;
 using BookClubApp.Services;
-using BookClubApp.Services.Imp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections;
 using System.Diagnostics;
 
 namespace BookClubApp.Controllers
 {
-    
-    public class BookController : Controller
+    /// <summary>
+    /// Book controller
+    /// </summary>
+    public class BookController(ILogger<BookController> logger, ApplicationDbContext context, IBookService bookService) : Controller
     {
-        private readonly ILogger<BookController> _logger;
-        private readonly ApplicationDbContext _context;
-        private readonly IBookService _bookService;
-        //private UserVM UserVM { get; set; }
-
-        public BookController(ILogger<BookController> logger, ApplicationDbContext context, IBookService bookService)
-        {
-            _logger = logger;
-            _context = context;
-            _bookService = bookService;
-        }
+        private readonly ILogger<BookController> _logger = logger;
+        private readonly ApplicationDbContext _context = context;
+        private readonly IBookService _bookService = bookService;
 
         [Authorize]
         public IActionResult Index()
         {
-            UserVM u = new UserVM(1, "xyz");
-            // Проверяем, аутентифицирован ли пользователь
-            var ui = User.Identity;
-            if (!User.Identity.IsAuthenticated)
-            {
-                // Если пользователь не аутентифицирован, перенаправляем на страницу входа
-                return RedirectToAction("Login", "Login");
-            }
+            _logger.LogInformation("Start page");
+            return View();
+        } 
 
-            // Если пользователь аутентифицирован, загружаем страницу Home
-            return View(u);
-        }
-
+        [Authorize]
         public IActionResult AllBooks()
         {
+            _logger.LogInformation("All books page");
             return View(_bookService.GetAllBooks(User.Identity.Name));
         }
 
+        [Authorize]
         public IActionResult ReadedBooks()
         {
+            _logger.LogInformation($"Readed books for {User.Identity.Name}");
             return View(_bookService.GetReadedBooks(User.Identity.Name));
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddReadedBook(int bookId, string userName)
+        public IActionResult AddBookToReaded(int bookId, string userName)
         {
             _bookService.AddToReadedBook(bookId, userName);
-
+            _logger.LogInformation($"Book {bookId} was added");
             return RedirectToAction("AllBooks", "Book");
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> DeleteReadedBook(int bookId, string userName)
+        public IActionResult DeleteBookFromReaded(int bookId, string userName)
         {
             _bookService.DeleteFromReadedBook(bookId, userName);
-
+            _logger.LogInformation($"Book {bookId} was deleted");
             return RedirectToAction("ReadedBooks", "Book");
         }
 
@@ -73,30 +60,32 @@ namespace BookClubApp.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+
+        /**
+         * просто так добавил юзеров и книги в бд
+         * 
+         * 
         public IActionResult AddUser()
         {
-            // Создаем нового пользователя
-            //var user = new User("User1");
+            
             var users = new List<User>() 
             {
+                new User("User1"),
                 new User("User2"),
                 new User("User3"),
                 new User("User4"),
                 new User("User5")
             };
 
-            // Добавляем пользователя в контекст базы данных
-            _context.Users.AddRange(users);
 
-            // Сохраняем изменения в базе данных
+            _context.Users.AddRange(users);
             _context.SaveChanges();
 
-            return RedirectToAction("Index"); // Перенаправляем на другую страницу
+            return RedirectToAction("Index"); 
         }
 
         public IActionResult AddBook()
         {
-            // Создаем новую книгу
             var books = new List<Book>()
             {
                 new Book("Title1"),
@@ -111,14 +100,10 @@ namespace BookClubApp.Controllers
                 new Book("Title10"),
             };
 
-
-            // Добавляем книгу в контекст базы данных
             _context.Books.AddRange(books);
-
-            // Сохраняем изменения в базе данных
             _context.SaveChanges();
 
-            return RedirectToAction("Index"); // Перенаправляем на другую страницу
-        }
+            return RedirectToAction("Index"); 
+        }*/
     }
 }

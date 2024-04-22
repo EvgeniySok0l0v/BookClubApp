@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookClubApp
 {
+    /// <summary>
+    /// ApplicationDbContext class
+    /// </summary>
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)

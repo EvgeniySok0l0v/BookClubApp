@@ -2,6 +2,9 @@
 
 namespace BookClubApp.Models
 {
+    /// <summary>
+    /// LoginModel
+    /// </summary>
     public class LoginModel
     {
         [Required(ErrorMessage = "Не указан Username")]

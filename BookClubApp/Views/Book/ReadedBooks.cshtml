@@ -3,12 +3,11 @@
 }
 @model List<BookClubApp.Models.BookModel>
 
-<table>
-    <thead>
+<table class="table">
+    <thead class="thead-dark">
         <tr>
-            <th>Title</th>
-            <th>ButAdd</th>
-            <!-- Добавьте заголовки для других столбцов -->
+            <th scope="col">Title</th>
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
@@ -17,14 +16,12 @@
             <tr>
                 <td>@item.Title</td>
                 <td>
-                    <!-- Добавляем кнопку Add -->
-                    <form id="deleteReadedBook" asp-controller="Book" asp-action="DeleteReadedBook" method="post">
+                    <form id="deleteReadedBook" asp-controller="Book" asp-action="DeleteBookFromReaded" method="post">
                         <input type="hidden" name="bookId" value=@item.Id />
                         <input type="hidden" name="userName" value=@User.Identity.Name />
                         <button type="submit" class="nav-link btn btn-link">Delete</button>
                     </form>
                 </td>
-                <!-- Отобразите другие свойства объекта в других ячейках -->
             </tr>
         }
     </tbody>

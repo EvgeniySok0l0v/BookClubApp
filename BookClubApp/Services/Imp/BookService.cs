@@ -36,6 +36,11 @@ namespace BookClubApp.Services.Imp
                 .Select(b => BookMapper.BookToBookModel(b, true))
                 .ToList();
 
+        /// <summary>
+        /// Find readed book from Db for User
+        /// </summary>
+        /// <param name="userName">username</param>
+        /// <returns>List of Book</returns>
         private IList<Book> GetReadedBooksFromDb(string userName)
         {
             return [.. _context.Users

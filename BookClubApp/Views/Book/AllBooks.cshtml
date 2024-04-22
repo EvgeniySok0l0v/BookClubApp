@@ -3,12 +3,12 @@
 }
 @model List<BookClubApp.Models.BookModel>
 
-<table>
-    <thead>
+
+<table class="table">
+    <thead class="thead-dark">
         <tr>
-            <th>Title</th>
-            <th>ButAdd</th>
-            <!-- Добавьте заголовки для других столбцов -->
+            <th scope="col">Title</th>
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
@@ -19,8 +19,7 @@
                 <td>
                     @if (!item.IsReaded)
                     {
-                        <!-- Добавляем кнопку Add -->
-                        <form id="addReadedBook" asp-controller="Book" asp-action="AddReadedBook" method="post">
+                        <form id="addReadedBook" asp-controller="Book" asp-action="AddBookToReaded" method="post">
                             <input type="hidden" name="bookId" value=@item.Id />
                             <input type="hidden" name="userName" value=@User.Identity.Name />
                             <button type="submit" class="nav-link btn btn-link">Add</button>
@@ -28,7 +27,7 @@
                     }
                     else
                     {
-                        <input type="submit" value="Added" disabled />
+                            <input type="submit" class="nav-link btn btn-link" value="Added" disabled />
                     }
                 </td>
                 <!-- Отобразите другие свойства объекта в других ячейках -->
@@ -36,3 +35,4 @@
         }
     </tbody>
 </table>
+

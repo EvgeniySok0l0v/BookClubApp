@@ -4,20 +4,27 @@ using BookClubApp.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace BookClubApp.Controllers
 {
-    public class LoginController(ApplicationDbContext? context, IUserService userService) : Controller
+    /// <summary>
+    /// LoginController class
+    /// </summary>
+    /// <param name="userService"></param>
+    public class LoginController(IUserService userService) : Controller
     {
-        private readonly ApplicationDbContext? _context = context;
         private readonly IUserService _userService = userService; 
         public IActionResult Login()
         {
             return View();
         }
 
+        /// <summary>
+        /// Login method, if user not found user will create
+        /// </summary>
+        /// <param name="model">login model</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginModel model)
@@ -27,35 +34,42 @@ namespace BookClubApp.Controllers
                 User user = _userService.GetUserByUserName(userName: model.UserName);
                 if (user != null)
                 {
-                    await Authenticate(userName: model.UserName); // аутентификация
+                    await Authenticate(userName: model.UserName); 
 
                     return RedirectToAction("Index", "Book");
                 }
                 else
                 {
-                    _context.Users.Add(new User(model.UserName));
-                    _context.SaveChanges();
+                    _userService.CreateUser(new User(model.UserName));
                     await Login(model);
                     return RedirectToAction("Index", "Book");
                 }
-                //ModelState.AddModelError("", "Некорректные логин");
             }
+
             return View(model);
         }
 
+        /// <summary>
+        /// Authenticate method 
+        /// </summary>
+        /// <param name="userName">username</param>
+        /// <returns></returns>
         private async Task Authenticate(string userName)
         {
-            // создаем один claim
             var claims = new List<Claim>
             {
                 new(ClaimsIdentity.DefaultNameClaimType, userName)
             };
-            // создаем объект ClaimsIdentity
+
             ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            // установка аутентификационных куки
+
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 
+        /// <summary>
+        /// Logout method
+        /// </summary>
+        /// <returns>redirect to Login</returns>
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
